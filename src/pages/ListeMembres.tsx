@@ -1,5 +1,6 @@
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonPage, IonList ,IonItem,IonLabel, IonButton} from '@ionic/react';
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 interface Membre{
     id:number;
@@ -10,11 +11,13 @@ interface Membre{
 }
 const ListeMembres: React.FC = ()=>{
      const [membres,setMembres] = useState<Membre[]>([]);
+     const { id: scrutinId } = useParams<{ id: string }>();
 
      useEffect(()=>{
+        if (!scrutinId) return; 
         const fetchMembres = async ()=>{
             try{
-                const res = await fetch('http://localhost:3000/api/v1/members');
+                const res = await fetch(`http://localhost:3000/api/v1/scrutins/${scrutinId}/members`);
                 if(!res.ok) throw new Error('Erreur HTTP : ${res.status}');
                 const json = await res.json();
                 setMembres(json.data);
@@ -26,19 +29,19 @@ const ListeMembres: React.FC = ()=>{
         };
         fetchMembres();
         
-     },[]);
+     }, [scrutinId]);
 
-      const handleVote = async (id: number) => {
+      const handleVote = async (memberId: number) => {
           try {
-            const res = await fetch(`http://localhost:3000/api/v1/members/${id}/vote`, {
+            const res = await fetch(`http://localhost:3000/api/v1/scrutins/${scrutinId}/members/${memberId}/vote`, {
                          method: 'POST',});
           if (!res.ok) throw new Error(`Erreur HTTP : ${res.status}`);
 
               setMembres(membres => membres.map(m =>
-                          m.id === id ? { ...m, has_voted: 1 } : m )
+                          m.id === memberId ? { ...m, has_voted: 1 } : m )
                         );
           } catch (err) {
-          console.error(`Erreur lors du vote pour le membre ${id} :`, err);
+          console.error(`Erreur lors du vote pour le membre ${memberId} :`, err);
             }
         };
 
@@ -59,9 +62,9 @@ const ListeMembres: React.FC = ()=>{
                            <p>Date de naissance : {membre.birth_date}</p>
                            </IonLabel>
                            {membre.has_voted?(
-                            <IonLabel color="succes"><strong>A voté</strong></IonLabel>
+                            <IonLabel color="success" slot="end"><strong>A voté</strong></IonLabel>
                            ):(
-                            <IonButton onClick={() => handleVote(membre.id)}>Voter</IonButton>
+                            <IonButton slot="end" onClick={() => handleVote(membre.id)}>Voter</IonButton>
                            )}
             
                        </IonItem>
