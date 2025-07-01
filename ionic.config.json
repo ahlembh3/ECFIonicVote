@@ -1,0 +1,7 @@
+{
+  "name": "voteApp",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
