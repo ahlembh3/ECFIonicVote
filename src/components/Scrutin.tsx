@@ -45,7 +45,9 @@ const Scrutin:  React.FC = () => {
                               <p>Date de debut : {new Date(scrutin.starts_at).toLocaleDateString()}</p>
                               <p>Date de fin :{new Date(scrutin.ends_at).toLocaleDateString()} </p>
                               </IonLabel>
-               
+                              <IonButton routerLink={`/scrutins/${scrutin.id}/members`} slot="end">
+                              Liste des membres
+                              </IonButton>
                           </IonItem>
                        ))}
                    </IonList>
