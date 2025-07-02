@@ -2,6 +2,7 @@ import {IonModal, IonHeader, IonToolbar, IonTitle, IonContent, IonPage, IonList 
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation} from 'react-router-dom';
 import { PieChart, Pie, Cell, Legend, Tooltip,ResponsiveContainer } from 'recharts';
+import './Home.css';
 
 
 
@@ -104,7 +105,8 @@ const ListeMembres: React.FC = ()=>{
                 <IonModal isOpen={showModal} onDidDismiss={() => setShowModal(false)}
                           initialBreakpoint={0.7}
                           breakpoints={[0, 0.7, 0.75]}
-                           handleBehavior="cycle" >
+                           handleBehavior="cycle"  
+                           className="modal-stat">
                    <IonHeader>
                      <IonToolbar>
                        <IonTitle>{title || 'Titre non disponible'}</IonTitle>
@@ -124,7 +126,13 @@ const ListeMembres: React.FC = ()=>{
                                           cx="50%"
                                           cy="50%"
                                           outerRadius={80}
-                                          label>
+                                            label={({  index  }: any) => {
+                                                                    const values = [stats.voted, stats.total - stats.voted];
+                                                                    const percent = (values[ index ] / stats.total) * 100;
+                                                                    console.log(`${percent.toFixed(0)}%`);
+                                                                    return `${percent.toFixed(0)}%`;
+                                                                  }}
+                                            >
                                            <Cell fill="#2dd36f" /> 
                                            <Cell fill="#eb445a" /> 
                                          </Pie>
