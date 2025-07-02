@@ -126,7 +126,7 @@ const ListeMembres: React.FC = ()=>{
                                           cx="50%"
                                           cy="50%"
                                           outerRadius={80}
-                                            label={({  index  }: any) => {
+                                            label={({  index  }) => {
                                                                     const values = [stats.voted, stats.total - stats.voted];
                                                                     const percent = (values[ index ] / stats.total) * 100;
                                                                     console.log(`${percent.toFixed(0)}%`);
