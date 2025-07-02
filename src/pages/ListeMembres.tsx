@@ -1,6 +1,10 @@
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonPage, IonList ,IonItem,IonLabel, IonButton} from '@ionic/react';
+import {IonModal, IonHeader, IonToolbar, IonTitle, IonContent, IonPage, IonList ,IonItem,IonLabel, IonButton} from '@ionic/react';
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation} from 'react-router-dom';
+import { PieChart, Pie, Cell, Legend, Tooltip,ResponsiveContainer } from 'recharts';
+
+
+
 
 interface Membre{
     id:number;
@@ -9,16 +13,27 @@ interface Membre{
     birth_date:string;
     has_voted:number;
 }
+
+interface State{
+    total:number;
+    voted:number;
+}
 const ListeMembres: React.FC = ()=>{
      const [membres,setMembres] = useState<Membre[]>([]);
+     const [stats,setStats] = useState<State | null>(null);
      const { id: scrutinId } = useParams<{ id: string }>();
+     const [showModal, setShowModal] = useState(false);
+     const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const title = queryParams.get('title');
+    console.log('Titre reçu :', title);
 
      useEffect(()=>{
         if (!scrutinId) return; 
         const fetchMembres = async ()=>{
             try{
                 const res = await fetch(`http://localhost:3000/api/v1/scrutins/${scrutinId}/members`);
-                if(!res.ok) throw new Error('Erreur HTTP : ${res.status}');
+                if(!res.ok) throw new Error(`Erreur HTTP : ${res.status}`);
                 const json = await res.json();
                 setMembres(json.data);
                 
@@ -42,6 +57,21 @@ const ListeMembres: React.FC = ()=>{
                         );
           } catch (err) {
           console.error(`Erreur lors du vote pour le membre ${memberId} :`, err);
+            }
+        };
+
+        const handleState = async () => {
+              try {
+            const res = await fetch(`http://localhost:3000/api/v1/scrutins/${scrutinId}/stats`, {
+                         method: 'GET',});
+                if(!res.ok) throw new Error(`Erreur HTTP : ${res.status}`);
+                const json = await res.json();
+                setStats(json.data);
+
+                setShowModal(true);
+
+            } catch(err){
+                console.error('Erreur lors du chargement des stats:',err);
             }
         };
 
@@ -70,7 +100,46 @@ const ListeMembres: React.FC = ()=>{
                        </IonItem>
                     ))}
                 </IonList>
-                
+                <IonButton color="medium" onClick={() => handleState()}>Consulter les stats</IonButton>
+                <IonModal isOpen={showModal} onDidDismiss={() => setShowModal(false)}
+                          initialBreakpoint={0.7}
+                          breakpoints={[0, 0.7, 0.75]}
+                           handleBehavior="cycle" >
+                   <IonHeader>
+                     <IonToolbar>
+                       <IonTitle>{title || 'Titre non disponible'}</IonTitle>
+                     </IonToolbar>
+                   </IonHeader>
+                   <IonContent className="ion-padding">
+                            {stats && (
+                                   <>
+                                   <ResponsiveContainer width="100%" height={250}>
+                                     <PieChart width={300} height={250}>
+                                         <Pie data={[
+                                                      { name: "A voté", value: stats.voted },
+                                                      { name: "N'a pas voté", value: stats.total - stats.voted },
+                                                    ]}
+                                          dataKey="value"
+                                          nameKey="name"
+                                          cx="50%"
+                                          cy="50%"
+                                          outerRadius={80}
+                                          label>
+                                           <Cell fill="#2dd36f" /> 
+                                           <Cell fill="#eb445a" /> 
+                                         </Pie>
+                                         <Tooltip />
+                                         <Legend />
+                                     </PieChart>
+                                     </ResponsiveContainer>
+                                 </>
+                            )}
+                        <IonButton expand="block" color="medium" onClick={() => setShowModal(false)}>
+                            Fermer
+            
+                        </IonButton>
+                  </IonContent>
+                </IonModal>
             </IonContent>
         </IonPage>
      );

@@ -16,7 +16,7 @@ const Scrutin:  React.FC = () => {
             const fetchScrutins = async ()=>{
                 try{
                     const res = await fetch('http://localhost:3000/api/v1/scrutins');
-                    if(!res.ok) throw new Error('Erreur HTTP : ${res.status}');
+                    if(!res.ok) throw new Error(`Erreur HTTP : ${res.status}`);
                     const json = await res.json();
                     setScrutins(json.data);
                     console.log(scrutins);
@@ -45,7 +45,8 @@ const Scrutin:  React.FC = () => {
                               <p>Date de debut : {new Date(scrutin.starts_at).toLocaleDateString()}</p>
                               <p>Date de fin :{new Date(scrutin.ends_at).toLocaleDateString()} </p>
                               </IonLabel>
-                              <IonButton routerLink={`/scrutins/${scrutin.id}/members`} slot="end">
+                              <IonButton routerLink={`/scrutins/${scrutin.id}/members?title=${encodeURIComponent(scrutin.title)}`}
+                              slot="end">
                               Liste des membres
                               </IonButton>
                           </IonItem>
